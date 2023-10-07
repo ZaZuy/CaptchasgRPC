@@ -1,0 +1,38 @@
+version: '1'
+services:
+  tensorflow-serving:
+    image: tensorflow/serving:latest
+    ports:
+      - '8500:8500'
+      - '8501:8501'
+    volumes:
+      - ./models/fbcaptcha:/models/fbcaptcha
+    command:
+      - tensorflow_model_server
+      - --model_name=fbcaptcha
+      - --model_base_path=/models/fbcaptcha
+      - --rest_api_port=8501
+      - --model_version_policy=specific  # Use specific versioning
+      - --allow_version_labels=True  # Allow specifying version labels
+    networks:
+      mynet:
+        ipv4_address: 10.5.0.5
+  web:
+    build: .
+    restart: always
+    volumes:
+      - .:/extractCaptchas
+    command: bash -c "python3 SolveCaptcha_flask.py"
+    ports:
+      - "5000:5000"
+    networks:
+      mynet:
+        ipv4_address: 10.5.0.4
+
+networks:
+  mynet:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1

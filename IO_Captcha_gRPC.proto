@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message String {
+    string value = 1;
+}
+
+service Calculator {
+    rpc SquareRoot(String) returns (String) {}
+}
